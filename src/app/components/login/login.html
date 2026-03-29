@@ -1,0 +1,63 @@
+<div class="login-wrapper">
+  <div class="login-bg"></div>
+  <form class="login-form" autocomplete="off" id="login-form" dir="rtl">
+    <div class="login-header">
+      <i class="bi bi-person-circle"></i>
+      <div class="login-title">ברוכים הבאים</div>
+      <div class="login-subtitle">התחברות למערכת</div>
+    </div>
+
+    <div class="login-field">
+      <label for="username" class="login-label">שם משתמש</label>
+      <input
+        type="text"
+        id="username"
+        class="login-input"
+        dir="ltr"
+        [(ngModel)]="username"
+        name="username"
+        (input)="checkFields()"
+      />
+    </div>
+
+    <div class="login-field">
+      <label for="password" class="login-label">סיסמה</label>
+      <input
+        type="password"
+        id="password"
+        class="login-input"
+        dir="ltr"
+        [(ngModel)]="password"
+        name="password"
+        (input)="checkFields()"
+      />
+    </div>
+
+    <div class="login-field">
+      <label for="company" class="login-label">חברה (MR)</label>
+      <input
+        type="text"
+        id="company"
+        class="login-input"
+        dir="ltr"
+        [(ngModel)]="company"
+        name="company"
+        placeholder="לדוגמה: 100"
+        (input)="checkFields()"
+        (keyup.enter)="onLogin()"
+      />
+    </div>
+
+    <button
+      type="button"
+      class="login-btn"
+      [disabled]="!canLogin"
+      (click)="onLogin()"
+    >
+      התחבר
+    </button>
+    @if (errorMessage) {
+      <div class="error-msg">{{ errorMessage }}</div>
+    }
+  </form>
+</div>

@@ -1,0 +1,22 @@
+.alert-banner {
+  background: var(--coral-50);
+  color: var(--coral-800);
+  border: 1px solid var(--coral-300);
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin: 16px auto;
+  max-width: 1200px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 480px) {
+  .alert-banner {
+    margin: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+}

@@ -1,0 +1,35 @@
+<div class="extraData" [class.active]="isOpen">
+  <div class="extraData-header">
+    <div></div>
+    <div class="title">נתוני שורות פריטים</div>
+    <button class="close-button" (click)="onClose()">&times;</button>
+  </div>
+  <div class="extraData-content">
+    <table class="extraDataTable" dir="rtl">
+      <thead>
+        <tr>
+          @for (col of headerColumns; track col) {
+            <th>{{ col }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of orderLines; track $index) {
+          <tr>
+            <td>{{ line.itemDescription }}</td>
+            <td>{{ line.itemNumber }}</td>
+            <td>{{ line.itemQuantity }}</td>
+            <td>{{ line.itemPrice }}</td>
+            <td>{{ line.totalPrice }}</td>
+            <td>{{ line.lineNote }}</td>
+          </tr>
+        }
+        @if (orderLines.length === 0) {
+          <tr>
+            <td colspan="6" class="text-center">לא נמצאו פרטים נוספים להזמנה זו.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+{
+  "/msf": {
+    "target": "http://62.0.70.169:8080",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/declined_orders": {
+    "target": "http://62.0.70.169:8080",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

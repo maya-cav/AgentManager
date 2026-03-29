@@ -1,0 +1,197 @@
+<div dir="rtl">
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  @if (toast.visible) {
+    <div class="toast" [class]="'toast toast-' + toast.type" [class.toast-show]="toast.visible">
+      <span class="toast-icon">
+        @if (toast.type === 'success') { <i class="bi bi-check-circle-fill"></i> }
+        @if (toast.type === 'error') { <i class="bi bi-x-circle-fill"></i> }
+        @if (toast.type === 'warning') { <i class="bi bi-exclamation-triangle-fill"></i> }
+      </span>
+      <span class="toast-text">{{ toast.message }}</span>
+    </div>
+  }
+
+  <!-- ========== CONFIRM DIALOG ========== -->
+  @if (confirmDialog.visible) {
+    <div class="confirm-overlay" (click)="cancelRelease()">
+      <div class="confirm-card" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <i class="bi bi-shield-exclamation"></i>
+        </div>
+        <h3 class="confirm-title">{{ confirmDialog.title }}</h3>
+        <p class="confirm-message">{{ confirmDialog.message }}</p>
+        <div class="confirm-actions">
+          <button class="confirm-btn confirm-yes" (click)="confirmRelease()">אישור שחרור</button>
+          <button class="confirm-btn confirm-no" (click)="cancelRelease()">ביטול</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========== DESKTOP: Table View ========== -->
+  @if (isDesktop) {
+    <div class="desktop-view">
+      <div class="table-toolbar">
+        <h2 class="page-title">ניהול סוכנים</h2>
+        <div class="toolbar-actions">
+          <span class="orders-count">נמצאו <strong>{{ filteredOrders.length }}</strong> מתוך <strong>{{ allOrders.length }}</strong> הזמנות</span>
+          <button class="reset-btn" (click)="resetFilters()">אפס סינונים</button>
+        </div>
+      </div>
+
+      @if (filteredOrders.length === 0) {
+        <div class="no-orders-message">
+          <i class="bi bi-info-circle"></i>
+          אין הזמנות חסומות כרגע
+        </div>
+      } @else {
+        <table class="orders-table">
+          <thead>
+            <tr>
+              @for (col of tableHeaderColumns; track col) {
+                <th>{{ col }}</th>
+              }
+            </tr>
+            <tr>
+              @for (col of filterableColumns; track col) {
+                <th>
+                  <input
+                    type="text"
+                    class="filter-input"
+                    [placeholder]="'סנן ' + col"
+                    [(ngModel)]="filters[col]"
+                    [attr.list]="'datalist-' + col"
+                    (input)="applyFilters()"
+                  />
+                  <datalist [id]="'datalist-' + col">
+                    @for (val of getDropdownValues(col); track val) {
+                      <option [value]="val"></option>
+                    }
+                  </datalist>
+                </th>
+              }
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of filteredOrders; track $index) {
+              <tr>
+                <td class="order-id-cell">{{ order.orderId }}</td>
+                <td>{{ order.customerName }}</td>
+                <td>{{ order.agent }}</td>
+                <td>{{ order.orderDate }}</td>
+                <td class="reason-cell">{{ order.reason }}</td>
+                <td>{{ order.totalValue }}</td>
+                <td>
+                  <button class="table-btn release" (click)="onRelease(order.orderId)">שיחרור</button>
+                </td>
+                <td>
+                  <button class="table-btn" (click)="openExtraData(order.orderId)">+</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <app-extra-data
+      [orderId]="selectedOrderId"
+      [isOpen]="extraDataOpen"
+      (close)="closeExtraData()"
+    ></app-extra-data>
+
+    <div
+      class="overlay"
+      [class.active]="extraDataOpen"
+      (click)="closeExtraData()"
+    ></div>
+  }
+
+  <!-- ========== MOBILE: Card View ========== -->
+  @if (!isDesktop) {
+    <button class="search-btn" (click)="openFilter()">&#x1F50D; חיפוש</button>
+
+    @if (filterOpen) {
+      <div class="filter-overlay">
+        <div class="filter-card">
+          <h3 class="filter-title">סינון נתונים</h3>
+          @for (col of filterableColumns; track col) {
+            <label>{{ col }}</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [placeholder]="'סנן ' + col"
+              [(ngModel)]="filters[col]"
+            />
+          }
+          <div class="filter-actions">
+            <button class="btn-mobile" (click)="applyMobileFilter()">החל סינון</button>
+            <button class="btn-mobile" (click)="resetFilters(); closeFilter()">בטל סינון</button>
+            <button class="btn-mobile" (click)="closeFilter()">סגור</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (filteredOrders.length === 0) {
+      <div class="no-orders-message">
+        <i class="bi bi-info-circle"></i>
+        אין הזמנות חסומות כרגע
+      </div>
+    } @else {
+      <div class="cards-container">
+          @for (order of filteredOrders; track $index) {
+            <div class="order-card">
+              <ul>
+                <li><strong>מספר הזמנה</strong>: <span class="order-id-value">{{ order.orderId }}</span></li>
+                <li><strong>שם הלקוח</strong>: {{ order.customerName }}</li>
+                <li><strong>שם הסוכן</strong>: {{ order.agent }}</li>
+                <li><strong>תאריך הזמנה</strong>: {{ order.orderDate }}</li>
+                <li><strong>סיבת החסימה</strong>: {{ order.reason }}</li>
+                <li><strong>ערך ההזמנה</strong>: {{ order.totalValue }}</li>
+                <li class="button-row">
+                  <button class="btn-mobile" (click)="toggleExtra(order)">+</button>
+                  <button class="btn-mobile release" (click)="onRelease(order.orderId)">שיחרור</button>
+                </li>
+              </ul>
+
+              @if (order.showExtra) {
+                <div class="extra-container">
+                  @for (line of getExtraLines(order.orderId); track $index) {
+                    <h5 class="extra-item-title">
+                      {{ line.itemDescription }}{{ line.itemNumber ? ' (' + line.itemNumber + ')' : '' }}
+                    </h5>
+                    <table class="extra-inline-table">
+                      <thead>
+                        <tr>
+                          <th>כמות</th>
+                          <th>מחיר</th>
+                          <th>ערך שורה</th>
+                          <th>הערת שורה</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{{ line.itemQuantity }}</td>
+                          <td>{{ line.itemPrice }}</td>
+                          <td>{{ line.totalPrice }}</td>
+                          <td>{{ line.lineNote }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  }
+                  @if (getExtraLines(order.orderId).length === 0) {
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">לא נמצאו פרטים נוספים להזמנה זו.</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+      </div>
+    }
+  }
+
+</div>
