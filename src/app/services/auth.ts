@@ -9,15 +9,15 @@ export class AuthService {
 
   constructor(private apiService: ApiService, private router: Router) { }
 
-  async login(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
+  async login(username: string, password: string, company: string): Promise<{ ok: boolean; error?: string }> {
     sessionStorage.setItem('username', username);
-    sessionStorage.setItem('password', password);
-    const mr = sessionStorage.getItem('mr') || '';
+    if (company) sessionStorage.setItem('mr', company);
     const url = this.apiService.mcall({ routine: 'DECORD', label: 'LOGIN' });
-    const res = await this.apiService.post(url, { USER: username, PASS: password, MR: mr });
+    const res = await this.apiService.post(url, { USER: username, PASS: password, MR: company });
     if (res.ok === true || res.ok === 'true') {
       localStorage.setItem('username', username);
       localStorage.setItem('token', res['ôïëåî'] || res.token);
+      if (res['MR']) sessionStorage.setItem('mr', res['MR']);
       const pageRouteMap: Record<string, string> = {
         'orders_grid.html': '/orders',
       };

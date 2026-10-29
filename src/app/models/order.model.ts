@@ -5,6 +5,7 @@ export interface Order {
   orderDate: string;
   reason: string;
   totalValue: string;
+  dividingLine: string;
   orderLines: OrderLine[];
 }
 

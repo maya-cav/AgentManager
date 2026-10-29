@@ -33,7 +33,7 @@
   @if (isDesktop) {
     <div class="desktop-view">
       <div class="table-toolbar">
-        <h2 class="page-title">ניהול סוכנים</h2>
+        <h2 class="page-title">שחרור הזמנות</h2>
         <div class="toolbar-actions">
           <span class="orders-count">נמצאו <strong>{{ filteredOrders.length }}</strong> מתוך <strong>{{ allOrders.length }}</strong> הזמנות</span>
           <button class="reset-btn" (click)="resetFilters()">אפס סינונים</button>
@@ -84,6 +84,7 @@
                 <td>{{ order.orderDate }}</td>
                 <td class="reason-cell">{{ order.reason }}</td>
                 <td>{{ order.totalValue }}</td>
+                <td>{{ order.dividingLine }}</td>
                 <td>
                   <button class="table-btn release" (click)="onRelease(order.orderId)">שיחרור</button>
                 </td>
@@ -152,6 +153,8 @@
                 <li><strong>תאריך הזמנה</strong>: {{ order.orderDate }}</li>
                 <li><strong>סיבת החסימה</strong>: {{ order.reason }}</li>
                 <li><strong>ערך ההזמנה</strong>: {{ order.totalValue }}</li>
+                <li><strong>קו חלוקה</strong>: {{ order.dividingLine }}</li>
+
                 <li class="button-row">
                   <button class="btn-mobile" (click)="toggleExtra(order)">+</button>
                   <button class="btn-mobile release" (click)="onRelease(order.orderId)">שיחרור</button>

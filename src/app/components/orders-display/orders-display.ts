@@ -17,8 +17,8 @@ interface OrderWithExtra extends Order {
   styleUrl: './orders-display.css',
 })
 export class OrdersDisplay implements OnInit {
-  readonly tableHeaderColumns = ['מספר הזמנה', 'שם הלקוח', 'שם הסוכן', 'תאריך הזמנה', 'סיבת החסימה', 'ערך הזמנה', 'שיחרור הזמנה', 'שורות הזמנה'];
-  readonly filterableColumns = ['מספר הזמנה', 'שם הלקוח', 'שם הסוכן', 'תאריך הזמנה', 'סיבת החסימה', 'ערך הזמנה'];
+  readonly tableHeaderColumns = ['מספר הזמנה', 'שם הלקוח', 'שם הסוכן', 'תאריך הזמנה', 'סיבת החסימה', 'ערך הזמנה', 'קו חלוקה', 'שיחרור הזמנה', 'שורות הזמנה'];
+  readonly filterableColumns = ['מספר הזמנה', 'שם הלקוח', 'שם הסוכן', 'תאריך הזמנה', 'סיבת החסימה', 'ערך הזמנה', 'קו חלוקה'];
 
   private readonly columnKeyMap: Record<string, keyof Order> = {
     'מספר הזמנה': 'orderId',
@@ -26,7 +26,8 @@ export class OrdersDisplay implements OnInit {
     'שם הסוכן': 'agent',
     'תאריך הזמנה': 'orderDate',
     'סיבת החסימה': 'reason',
-    'ערך הזמנה': 'totalValue'
+    'ערך הזמנה': 'totalValue',
+    'קו חלוקה': 'dividingLine'
   };
 
   allOrders: OrderWithExtra[] = [];

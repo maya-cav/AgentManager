@@ -34,7 +34,7 @@
     </div>
 
     <div class="login-field">
-      <label for="company" class="login-label">חברה (MR)</label>
+      <label for="company" class="login-label">מספר חברה</label>
       <input
         type="text"
         id="company"
@@ -42,9 +42,7 @@
         dir="ltr"
         [(ngModel)]="company"
         name="company"
-        placeholder="לדוגמה: 100"
         (input)="checkFields()"
-        (keyup.enter)="onLogin()"
       />
     </div>
 

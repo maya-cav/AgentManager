@@ -13,7 +13,6 @@ export class OrdersService {
 
   async fetchOrders(): Promise<Order[]> {
     const url = this.apiService.mcall({ routine: 'DECORD', label: 'EXTDATAMCALL' });
-    // Keep payload identical to the original working implementation.
     const result = await this.apiService.post(url, {});
 
     this.orders = Array.isArray(result) ? result.flatMap((o: any) => {
@@ -38,6 +37,7 @@ export class OrdersService {
         agent: o.agent || '',
         orderDate: o.orderDate || '',
         totalValue: String(o.totalValue || ''),
+        dividingLine: String(o.dividingLine || ''),
         orderLines: items,
       };
 

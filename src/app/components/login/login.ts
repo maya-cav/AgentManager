@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -13,16 +12,14 @@ import { AuthService } from '../../services/auth';
 export class Login implements OnInit {
   username = '';
   password = '';
-  company = '';
+  company = '100';
   canLogin = false;
   errorMessage = '';
 
-  constructor(private authService: AuthService, private route: ActivatedRoute) { }
+  constructor(private authService: AuthService) { }
 
   ngOnInit() {
-    const uci = "SVK";
     this.username = this.authService.getStoredUsername();
-    this.company = this.authService.getStoredCompany();
     this.checkFields();
   }
 
@@ -33,10 +30,7 @@ export class Login implements OnInit {
   async onLogin() {
     if (!this.canLogin) return;
     this.errorMessage = '';
-    if (this.company) {
-      this.authService.setCompany(this.company);
-    }
-    const result = await this.authService.login(this.username, this.password);
+    const result = await this.authService.login(this.username, this.password, this.company);
     if (!result.ok) {
       this.errorMessage = result.error || 'אימות משתמש נכשל';
     }
