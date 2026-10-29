@@ -37,6 +37,7 @@
         <div class="toolbar-actions">
           <span class="orders-count">נמצאו <strong>{{ filteredOrders.length }}</strong> מתוך <strong>{{ allOrders.length }}</strong> הזמנות</span>
           <button class="reset-btn" (click)="resetFilters()">אפס סינונים</button>
+          <button class="logout-btn" (click)="logout()"><i class="bi bi-box-arrow-left"></i> התנתק</button>
         </div>
       </div>
 
@@ -114,6 +115,7 @@
   <!-- ========== MOBILE: Card View ========== -->
   @if (!isDesktop) {
     <button class="search-btn" (click)="openFilter()">&#x1F50D; חיפוש</button>
+    <button class="logout-btn logout-btn-mobile" (click)="logout()"><i class="bi bi-box-arrow-left"></i> התנתק</button>
 
     @if (filterOpen) {
       <div class="filter-overlay">

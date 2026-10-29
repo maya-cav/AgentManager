@@ -12,14 +12,17 @@ import { AuthService } from '../../services/auth';
 export class Login implements OnInit {
   username = '';
   password = '';
-  company = '100';
+  company = '';
   canLogin = false;
+  loggingIn = false;
   errorMessage = '';
 
   constructor(private authService: AuthService) { }
 
   ngOnInit() {
     this.username = this.authService.getStoredUsername();
+    this.company = this.authService.getStoredCompany();
+    this.errorMessage = this.authService.takeLoginMessage();
     this.checkFields();
   }
 
@@ -28,11 +31,18 @@ export class Login implements OnInit {
   }
 
   async onLogin() {
-    if (!this.canLogin) return;
+    if (!this.canLogin || this.loggingIn) return;
     this.errorMessage = '';
-    const result = await this.authService.login(this.username, this.password, this.company);
-    if (!result.ok) {
-      this.errorMessage = result.error || 'אימות משתמש נכשל';
+    this.loggingIn = true;
+    try {
+      const result = await this.authService.login(this.username, this.password, this.company);
+      if (!result.ok) {
+        this.errorMessage = result.error || 'אימות משתמש נכשל';
+      }
+    } catch {
+      this.errorMessage = 'שגיאת תקשורת עם השרת';
+    } finally {
+      this.loggingIn = false;
     }
   }
 }

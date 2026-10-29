@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config';
 
 @Injectable({
   providedIn: 'root',
@@ -10,27 +10,19 @@ import { environment } from '../../environments/environment';
 export class ApiService {
   baseURL: string;
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router, private configService: ConfigService) {
     const webApp = window.location.pathname.split('/')[1];
     this.baseURL = window.origin + '/' + webApp;
   }
 
-
-
+  // Credentials never go in the URL (it ends up in server/proxy logs) -
+  // the session token is sent in the Authorization header instead.
   mcall(params: { routine: string; label: string }): string {
     const { routine, label } = params;
-    const namespace = sessionStorage.getItem('namespace') || 'SVK';
-    const username = sessionStorage.getItem('username') || '';
-    const password = sessionStorage.getItem('password') || '';
-
-    const url =
-      this.baseURL
-      + '/mcall?_ROUTINE=' + routine
-      + '&_LABEL=' + label
-      + '&_NS=' + namespace
-      + '&_USERNAME=' + username
-      + '&_PASSWORD=' + password;
-    return url;
+    return this.baseURL
+      + '/mcall?_ROUTINE=' + encodeURIComponent(routine)
+      + '&_LABEL=' + encodeURIComponent(label)
+      + '&_NS=' + encodeURIComponent(this.configService.namespace);
   }
 
   async get(url: string): Promise<any> {
@@ -50,7 +42,7 @@ export class ApiService {
       });
       const source = payload !== undefined
         ? this.http.post(url, payload, { headers, responseType: 'arraybuffer' })
-        : this.http.get(url, { responseType: 'arraybuffer' });
+        : this.http.get(url, { headers, responseType: 'arraybuffer' });
 
       const buffer = await firstValueFrom(source);
       const decoder = new TextDecoder('windows-1255');
@@ -58,21 +50,26 @@ export class ApiService {
 
       if (data) {
         if (data.includes('ERR>') || data.includes('Error occurred')) {
-          console.error('Server error in response:', data);
+          console.error('Server error in response');
           throw new Error(data);
-        } else {
-          const parsed = JSON.parse(data);
-          return parsed;
         }
+        return JSON.parse(data);
       }
     } catch (error: any) {
-      if (error?.status === 401) {
-        this.router.navigateByUrl('/login');
+      if (error?.status === 401 || error?.status === 403) {
+        this.endSession();
         return {};
       }
       console.error('API request failed:', error);
       throw error;
     }
     return {};
+  }
+
+  // Session is gone (expired, or the same user logged in on another device).
+  private endSession() {
+    localStorage.removeItem('token');
+    sessionStorage.setItem('loginMessage', 'החיבור הסתיים, יש להתחבר מחדש');
+    this.router.navigateByUrl('/login');
   }
 }

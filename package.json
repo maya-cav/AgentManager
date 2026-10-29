@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
-    "build:prod": "ng build --configuration production"
+    "build:prod": "ng build --configuration production",
+    "build:shokha": "ng build --configuration production --base-href /shukhaagent/AgentManager/"
   },
   "private": true,
   "dependencies": {

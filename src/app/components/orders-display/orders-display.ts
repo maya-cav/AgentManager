@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { OrdersService } from '../../services/orders';
+import { AuthService } from '../../services/auth';
 import { Order, OrderLine } from '../../models/order.model';
 import { ExtraData } from '../extra-data/extra-data';
 
@@ -51,7 +52,7 @@ export class OrdersDisplay implements OnInit {
   confirmDialog = { visible: false, title: '', message: '' };
   private pendingReleaseId = '';
 
-  constructor(private ordersService: OrdersService) { }
+  constructor(private ordersService: OrdersService, private authService: AuthService) { }
 
   ngOnInit() {
     const raw = this.ordersService.getOrders();
@@ -129,6 +130,17 @@ export class OrdersDisplay implements OnInit {
     }, 4000);
   }
 
+  private async refreshOrders() {
+    await this.ordersService.fetchOrders();
+    const raw = this.ordersService.getOrders();
+    this.allOrders = raw.map(o => ({ ...o, showExtra: false }));
+    this.applyFilters();
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
   // Release order
   onRelease(orderId: string) {
     this.pendingReleaseId = orderId;
@@ -154,14 +166,16 @@ export class OrdersDisplay implements OnInit {
       const release = res.Release || res;
       if (release.isLocked) {
         this.showToast(`הזמנה ${orderId} לא טופלה - מטופלת במסוף אחר`, 'error');
+      } else if (release.error) {
+        this.showToast(`הזמנה ${orderId} לא שוחררה: ${release.error}`, 'error');
       } else if (release['Still-Block']) {
         this.showToast(`הזמנה ${orderId} עדיין חסומה: ${release['Still-Block']}`, 'error');
       } else if (release.Open) {
         this.showToast(`הזמנה ${orderId} שוחררה, אך קיים ממצא פתוח: ${release.Open}`, 'warning');
-        await this.ordersService.fetchOrders();
-        const raw = this.ordersService.getOrders();
-        this.allOrders = raw.map(o => ({ ...o, showExtra: false }));
-        this.applyFilters();
+        await this.refreshOrders();
+      } else if (release.Released) {
+        this.showToast(`הזמנה ${orderId} שוחררה בהצלחה`, 'success');
+        await this.refreshOrders();
       } else {
         this.showToast('שגיאה בשחרור ההזמנה', 'error');
       }

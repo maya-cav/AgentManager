@@ -49,10 +49,10 @@
     <button
       type="button"
       class="login-btn"
-      [disabled]="!canLogin"
+      [disabled]="!canLogin || loggingIn"
       (click)="onLogin()"
     >
-      התחבר
+      {{ loggingIn ? 'מתחבר...' : 'התחבר' }}
     </button>
     @if (errorMessage) {
       <div class="error-msg">{{ errorMessage }}</div>
