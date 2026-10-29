@@ -42,7 +42,10 @@ export class OrdersDisplay implements OnInit {
   // Mobile filter overlay
   filterOpen = false;
 
-  isDesktop = window.innerWidth >= 480;
+  // Matches the 768px breakpoint in the CSS - tablets get cards, not the 9-column table.
+  private readonly desktopMinWidth = 768;
+  isDesktop = window.innerWidth >= this.desktopMinWidth;
+  refreshing = false;
 
   // Toast notification
   toast = { visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' };
@@ -63,7 +66,7 @@ export class OrdersDisplay implements OnInit {
 
   @HostListener('window:resize')
   onResize() {
-    this.isDesktop = window.innerWidth >= 480;
+    this.isDesktop = window.innerWidth >= this.desktopMinWidth;
   }
 
   mapColumnKey(header: string): keyof Order {
@@ -130,11 +133,20 @@ export class OrdersDisplay implements OnInit {
     }, 4000);
   }
 
-  private async refreshOrders() {
-    await this.ordersService.fetchOrders();
-    const raw = this.ordersService.getOrders();
-    this.allOrders = raw.map(o => ({ ...o, showExtra: false }));
-    this.applyFilters();
+  // Separate from the release itself, so a failed reload is not reported as a failed release.
+  async refreshOrders() {
+    if (this.refreshing) return;
+    this.refreshing = true;
+    try {
+      await this.ordersService.fetchOrders();
+      const raw = this.ordersService.getOrders();
+      this.allOrders = raw.map(o => ({ ...o, showExtra: false }));
+      this.applyFilters();
+    } catch {
+      this.showToast('רענון הרשימה נכשל, נסה שוב', 'error');
+    } finally {
+      this.refreshing = false;
+    }
   }
 
   logout() {

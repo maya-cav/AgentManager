@@ -1,12 +1,13 @@
 @if (loading) {
-  <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">טוען...</span>
-    </div>
+  <div class="loading-screen" role="status">
+    <div class="spinner"></div>
+    <span>טוען הזמנות...</span>
+  </div>
+} @else if (error) {
+  <div class="alert-banner" dir="rtl">
+    {{ error }}
+    <button class="retry-btn" (click)="load()">נסה שוב</button>
   </div>
 } @else {
-  @if (error) {
-    <div class="alert-banner" dir="rtl">{{ error }}</div>
-  }
   <app-orders-display />
 }

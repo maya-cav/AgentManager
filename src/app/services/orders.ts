@@ -2,6 +2,20 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api';
 import { Order, OrderLine } from '../models/order.model';
 
+// %ZCAVJSON returns numbered subscripts as an array only when they are 1..n with no gaps
+// (e.g. order lines 1,2,5 come back as an object), so accept both.
+function toList(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object') return Object.values(value);
+  return [];
+}
+
+function formatAmount(value: any): string {
+  const num = Number(value);
+  if (value === '' || value == null || !Number.isFinite(num)) return String(value ?? '');
+  return num.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,42 +29,34 @@ export class OrdersService {
     const url = this.apiService.mcall({ routine: 'DECORD', label: 'EXTDATAMCALL' });
     const result = await this.apiService.post(url, {});
 
-    this.orders = Array.isArray(result) ? result.flatMap((o: any) => {
-      const items: OrderLine[] = Array.isArray(o.Items)
-        ? o.Items.map((item: any) => ({
-          itemDescription: item.itemDescription || '',
-          itemNumber: String(item.itemNumber || ''),
-          itemQuantity: String(item.itemQuantity || ''),
-          itemPrice: item.itemPrice || '',
-          totalPrice: item.totalPrice || '',
-          lineNote: item.lineNote
-            ? (typeof item.lineNote === 'object'
-              ? Object.values(item.lineNote).join(', ')
-              : String(item.lineNote))
-            : '',
-        }))
-        : [];
+    this.orders = toList(result).map((o: any) => {
+      const items: OrderLine[] = toList(o.Items).map((item: any) => ({
+        itemDescription: item.itemDescription || '',
+        itemNumber: String(item.itemNumber || ''),
+        itemQuantity: String(item.itemQuantity || ''),
+        itemPrice: item.itemPrice || '',
+        totalPrice: item.totalPrice || '',
+        lineNote: item.lineNote
+          ? (typeof item.lineNote === 'object'
+            ? Object.values(item.lineNote).join(', ')
+            : String(item.lineNote))
+          : '',
+      }));
 
-      const base = {
+      // One row per order - an order blocked for several reasons used to appear several times.
+      const reasons = toList(o['F-CLOSE']).map(String).filter(Boolean);
+
+      return {
         orderId: String(o.orderId || ''),
         customerName: o.customerName || '',
         agent: o.agent || '',
         orderDate: o.orderDate || '',
-        totalValue: String(o.totalValue || ''),
+        reason: reasons.join(' | '),
+        totalValue: formatAmount(o.totalValue),
         dividingLine: String(o.dividingLine || ''),
         orderLines: items,
       };
-
-      const fclose = o['F-CLOSE'];
-      if (fclose && typeof fclose === 'object') {
-        const reasons = Object.values(fclose) as string[];
-        if (reasons.length > 1) {
-          return reasons.map(reason => ({ ...base, reason }));
-        }
-        return [{ ...base, reason: reasons[0] || '' }];
-      }
-      return [{ ...base, reason: '' }];
-    }) : [];
+    });
 
     return this.orders;
   }
@@ -66,12 +72,6 @@ export class OrdersService {
 
   async releaseOrder(orderId: string): Promise<any> {
     const url = this.apiService.mcall({ routine: 'DECORD', label: 'RELEASEORD' });
-    try {
-      // Keep payload identical to the original working implementation.
-      const result = await this.apiService.post(url, { ORDID: orderId });
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.apiService.post(url, { ORDID: orderId });
   }
 }

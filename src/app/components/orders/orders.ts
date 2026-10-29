@@ -15,11 +15,18 @@ export class Orders implements OnInit {
 
   constructor(private ordersService: OrdersService) {}
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.load();
+  }
+
+  // On failure show only the error - never "no blocked orders", which would look like everything was released.
+  async load() {
+    this.loading = true;
+    this.error = '';
     try {
       await this.ordersService.fetchOrders();
     } catch {
-      this.error = 'שגיאה בטעינת ההזמנות. נסה לרענן את הדף.';
+      this.error = 'שגיאה בטעינת ההזמנות.';
     }
     this.loading = false;
   }
