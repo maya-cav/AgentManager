@@ -8,13 +8,17 @@ export interface AppConfig {
   namespace: string;
   defaultCompany: string;
   customerName: string;
+  requireHttps: boolean;
 }
 
 const DEFAULTS: AppConfig = {
   namespace: 'SVK',
   defaultCompany: '',
   customerName: '',
+  requireHttps: true,
 };
+
+const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +34,15 @@ export class ConfigService {
       this.config = { ...DEFAULTS, ...loaded };
     } catch {
       console.warn('config.json not found, using defaults');
+    }
+    this.enforceHttps();
+  }
+
+  // Never let the password/token travel over plain HTTP at a customer site.
+  private enforceHttps() {
+    const { protocol, hostname, href } = window.location;
+    if (this.config.requireHttps && protocol === 'http:' && !LOCAL_HOSTS.includes(hostname)) {
+      window.location.replace('https:' + href.substring('http:'.length));
     }
   }
 

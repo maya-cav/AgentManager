@@ -19,7 +19,7 @@ ng build --configuration production --base-href /<app>/AgentManager/   # לקו�
 את תוכן `dist/agentManager/browser` מעתיקים לשרת הלקוח. את ההגדרות של כל לקוח עורכים ב-`config.json` שבתיקייה, בלי build מחדש:
 
 ```json
-{ "namespace": "SVK", "defaultCompany": "100", "customerName": "" }
+{ "namespace": "SVK", "defaultCompany": "100", "customerName": "", "requireHttps": true }
 ```
 
-הגישה אצל הלקוח צריכה להיות ב-HTTPS בלבד.
+`requireHttps: true` (ברירת המחדל) מעביר אוטומטית כל כניסה ב-http ל-https, חוץ מ-localhost. בשרת שעדיין אין לו תעודת SSL (למשל שרת בדיקות) צריך להגדיר `false`, אחרת האפליקציה לא תיטען.
